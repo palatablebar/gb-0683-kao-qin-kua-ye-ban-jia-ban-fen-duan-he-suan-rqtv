@@ -8,7 +8,7 @@
 docker compose up --build -d
 ```
 
-访问 http://localhost:18252 。初次启动自动运行脏样例，可切换 clean.csv 与 legacy.csv。顶部“运行批次”会重新计算，同源输入复用批次。
+访问 http://localhost:18252 。初次启动自动运行脏样例，可切换 clean.csv、legacy.csv 与 overlap.csv（补卡/排班调整重叠样例）。顶部“运行批次”会重新计算，同源输入复用批次。
 
 ## 业务模块
 
@@ -22,7 +22,7 @@ docker compose up --build -d
 
 ## 核心规则
 
-跨夜按班次归属日配对，休息区间先扣除，再按法定日期和工时阈值切分倍率。完整数值、边界和异常定义见 `docs/DATA-DICTIONARY.md`。
+跨夜按班次归属日配对，休息区间先扣除，再按法定日期和工时阈值切分倍率。补卡或排班调整造成的两班时段重叠，按分钟裁决唯一归属（版本高者胜、计划覆盖者胜、到岗早者胜、ID小者胜），败方仅扣回重叠分钟并留证据。完整数值、边界和异常定义见 `docs/DATA-DICTIONARY.md`。
 
 ## 验证
 

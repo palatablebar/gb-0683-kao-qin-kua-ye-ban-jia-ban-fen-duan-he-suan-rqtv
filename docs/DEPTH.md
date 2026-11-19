@@ -10,7 +10,7 @@
 | M2 班次日历 | 查看并复算班次日历 | `/api/m2_mapping` | `app/modules/m2_mapping/rules.py` | `tests/test_mapping.py` |
 | M3 跨夜配对 | 查看并复算跨夜配对 | `/api/m3_versions` | `app/modules/m3_versions/rules.py` | `tests/test_versions.py` |
 | M4 缺卡复核 | 查看并复算缺卡复核 | `/api/m4_segments` | `app/modules/m4_segments/rules.py` | `tests/test_segments.py` |
-| M5 工时切段 | 查看并复算工时切段 | `/api/m5_calculate` | `app/modules/m5_calculate/rules.py` | `tests/test_calculate.py` |
+| M5 工时切段 | 查看并复算工时切段 | `/api/m5_calculate` | `app/modules/m5_calculate/rules.py`、`app/modules/m5_calculate/overlap.py` | `tests/test_calculate.py`、`tests/test_overlap.py` |
 | M6 薪资对账 | 查看并复算薪资对账 | `/api/m6_reconcile` | `app/modules/m6_reconcile/compare.py` | `tests/test_reconcile.py` |
 | M7 周期归档 | 查看并复算周期归档 | `/api/m7_archive` | `app/modules/m7_archive/export_out.py` | `tests/test_archive.py` |
 
@@ -31,10 +31,14 @@
 | TRAP-26 | 旧版本复核 | 覆盖新结论 | 事务条件更新 | `app/store.py` | `tests/test_archive.py::test_stale_review` |
 | TRAP-23 | 休息与跨夜端点 | 重复或漏计 | 半开区间切片 | `app/modules/m4_segments/rules.py` | `tests/test_segments.py::test_break_removed` |
 | TRAP-19 | 假日与周末重叠 | 费率相加 | 假日优先 | `app/modules/m5_calculate/rules.py` | `tests/test_calculate.py::test_holiday_overrides_rest` |
+| TRAP-31 | 两班同时段重叠 | 双计或整班剔除 | 按分钟裁决唯一归属并留扣回证据 | `app/modules/m5_calculate/overlap.py` | `tests/test_overlap.py::test_overlap_minutes_paid_exactly_once` |
+| TRAP-32 | 重试同一输入 | 扣回翻倍或覆盖批次 | 身份幂等+INSERT OR IGNORE | `app/store.py` | `tests/test_overlap.py::test_retry_same_input_adds_no_deduction` |
+| TRAP-33 | 归属规则变更 | 旧结果混入新口径 | 规则版本计入批次身份即作废 | `app/manifest.py` | `tests/test_overlap.py::test_rule_change_invalidates_previous_results` |
+| TRAP-34 | 切换中途失败 | 新结果覆盖可付款依据 | 单事务保存，失败保留旧版 | `app/store.py` | `tests/test_overlap.py::test_failed_save_keeps_previous_latest` |
 
 ## 对账规则
 
-输入行数=采纳+隔离+空行+重复表头+完全重复；业务总数与计算证据独立求和。隔离行保留来源行、ID、原因码与原值。
+输入行数=采纳+隔离+空行+重复表头+完全重复；业务总数与计算证据独立求和。隔离行保留来源行、ID、原因码与原值。考勤恒等式：原始分钟=可付分钟+扣回分钟，计薪分钟=可付分钟；扣回证据写明被扣回班次、归属班次、时段与双方来源行。
 
 ## 已知不覆盖
 

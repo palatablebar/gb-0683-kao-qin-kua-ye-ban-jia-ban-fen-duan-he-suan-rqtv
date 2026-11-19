@@ -18,6 +18,6 @@ def price(segments,holidays):
 
 def apply(state):
     holidays=set(state['parameters'].get('holidays',['2026-10-01']))
-    calculations=price(state['segments'],holidays)
+    calculations=price(state['payable'],holidays)
     total=sum((Decimal(r['amount']) for r in calculations),Decimal(0));paid=sum((Decimal(str(r['paid'])) for r in state['rows']),Decimal(0))
     state['calculations']=calculations;state['business']={'total':str(total),'paid':str(paid),'difference':str(total-paid),'minutes':sum(r['minutes'] for r in calculations),'unit':'CNY'};return state
